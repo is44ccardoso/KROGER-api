@@ -1,14 +1,27 @@
-const express = require('express')
+const Hapi = require('@hapi/hapi')
+const connectDB = require('./app/config/db')
+const userRoutes = require('./app/routes/users')
 
-const app = express()
+const init = async () => {
+  const server = Hapi.server({
+    port: 5000,
+    host: 'localhost'
+  })
 
-app.get('/', (req, res) => res.send('API is running beautifully!'))
+  await server.start()
+  await connectDB()
 
-app.get('/fullname', (req, res) => {
-  const name = 'Isaac'
-  const lastname = 'Cardoso'
+  server.route({
+    method: 'GET',
+    path: '/',
+    handler: (request, h) => {
+      return 'API is running beautifully!'
+    }
+  })
 
-  res.send(`${name} ${lastname}`)
-})
+  userRoutes(server)
 
-app.listen(5000, () => console.log('App is running'))
+  console.log('Server running on port 5000')
+}
+
+init()
